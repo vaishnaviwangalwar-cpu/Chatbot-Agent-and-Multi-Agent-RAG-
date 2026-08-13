@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🤖 AI Workshop — DY Patil University
+# 🤖 AI Workshop
 
 ### *From Zero to Production-Ready AI Applications*
 
@@ -720,10 +720,6 @@ Contributions are welcome! If you attended the workshop and want to improve or e
 ---
 
 <div align="center">
-
-**⭐ If you found this workshop helpful, give the repo a star!**
-
-Made with ❤️ for DY Patil University AI Workshop
 
 </div>
 
