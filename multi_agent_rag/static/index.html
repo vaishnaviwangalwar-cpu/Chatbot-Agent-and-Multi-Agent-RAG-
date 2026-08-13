@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Agent RAG Assistant | DY Patil University</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        </div>
+        <div class="brand-text">
+          <h2>Policy RAG Assistant</h2>
+          <span>DY Patil University</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <label class="section-label">Active Documents</label>
+        <div id="sourcesList" class="sources-list">
+          <!-- Populated dynamically via GET /api/rag/sources -->
+          <div class="source-loading">Scanning document index...</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="slider-row">
+          <span class="control-title">Retrieve Chunks (Top K)</span>
+          <span id="topKValue" class="control-value">3</span>
+        </div>
+        <input type="range" id="topKSlider" min="2" max="6" value="3" class="slider-input">
+      </div>
+
+
+
+      <div class="sidebar-section">
+        <label class="section-label">Grounded Sample Queries</label>
+        <div class="suggestions-list">
+          <button class="suggestion-chip" data-msg="How many books can an undergrad borrow and for how long?">Undergrad Book Limits</button>
+          <button class="suggestion-chip" data-msg="What are the curfew hours for the hostel?">Hostel Curfew</button>
+          <button class="suggestion-chip" data-msg="How much is the exam retake fee per subject?">Exam Retake Fee</button>
+          <button class="suggestion-chip" data-msg="What is the refund if I withdraw in the first 2 weeks?">Admission Refund</button>
+          <button class="suggestion-chip" data-msg="What is the campus WiFi password?">WiFi Password (Out-of-Scope)</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <label class="section-label">Upload Policy Document</label>
+        <input type="file" id="docUploadInput" accept=".txt,.pdf,.png,.jpg,.jpeg" class="hidden">
+        <button id="uploadTriggerBtn" class="btn btn-secondary">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          <span>Upload TXT / PDF / Image</span>
+        </button>
+      </div>
+
+      <div class="sidebar-footer">
+        <button id="reingestBtn" class="btn btn-secondary">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+          <span>Rebuild Vector Index</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Viewport -->
+    <main class="chat-viewport">
+      <header class="chat-header">
+        <div class="header-info">
+          <h1>Multi-Agent Policy Assistant</h1>
+          <div class="status-badge">
+            <span class="status-dot"></span>
+            <span id="healthCount">Syncing vector store...</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <span class="badge">Retrieve-Augmented Generation</span>
+        </div>
+      </header>
+
+      <!-- Message Stream -->
+      <div class="messages-container" id="messagesContainer">
+        <!-- Welcome Card -->
+        <div class="welcome-card" id="welcomeCard">
+          <div class="welcome-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          </div>
+          <h2>Policy RAG Q&A Assistant</h2>
+          <p>Submit questions about DY Patil University's admissions, fee refunds, examination condonation, library borrowing rules, or hostel curfews.</p>
+          <div class="capabilities-grid">
+            <div class="cap-card">
+              <h3>Local Vector Store</h3>
+              <p>Uses ChromaDB and sentence embeddings to fetch document paragraphs.</p>
+            </div>
+            <div class="cap-card">
+              <h3>Strict Grounding</h3>
+              <p>Answers are generated based ONLY on the retrieved policy facts.</p>
+            </div>
+            <div class="cap-card">
+              <h3>Source Citations</h3>
+              <p>Every answer highlights the exact files and context chunks used.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thinking Indicator -->
+      <div class="typing-indicator hidden" id="typingIndicator">
+        <div class="dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="typing-text">Embedding query & retrieving policies...</span>
+      </div>
+
+      <!-- Input Area -->
+      <footer class="chat-input-area">
+        <form id="chatForm">
+          <input type="text" id="userInput" placeholder="Ask about library borrowing, curfew timings, withdrawal refunds..." autocomplete="off">
+          <button type="submit" id="sendBtn" class="btn btn-primary">
+            <span>Query</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </form>
+      </footer>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
