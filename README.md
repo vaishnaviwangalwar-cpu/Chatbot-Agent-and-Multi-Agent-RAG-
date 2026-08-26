@@ -1,7 +1,5 @@
 <div align="center">
 
-# 🤖 AI Workshop
-
 ### *From Zero to Production-Ready AI Applications*
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
