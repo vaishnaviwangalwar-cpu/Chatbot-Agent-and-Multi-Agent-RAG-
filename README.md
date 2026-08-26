@@ -23,7 +23,7 @@
 
 </div>
 
-## 🗺️ Workshop at a Glance
+## 🗺️ Workflow
 
 ```mermaid
 mindmap
